@@ -50,3 +50,22 @@ hero {
   object-fit: cover;
   border-radius: 5rem;
 }
+
+.badge-genre {
+  background-color: #E50914;
+}
+
+.footer {
+  border-top: 1px solid #222;
+  color: #9AA4AD;
+}
+
+::-webkit-scrollbar {
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 4px;
+  back
+}
