@@ -1,0 +1,52 @@
+
+
+
+
+
+
+hero {
+  min-height: 55vh;
+  background-size: cover;
+  display: flex;
+  align-items: end;
+  padding: 3rem 1rem;
+  position: relative;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.7));
+}
+
+.hero > .container {
+  position: relative;
+  z-index: 2;
+}
+
+.row-title {
+  font-weight: 700;
+  margin: 1rem 0 .5 rem;
+}
+
+.rail {
+  display: flex;
+  gap: 1rem;
+  overflow: auto;
+  padding-bottom: .5rem;
+  scroll-snap-type: x mandatory;
+}
+
+.card-poster {
+  min-width: 160px;
+  scroll-snap-align: start;
+  background: #111;
+  border: none;
+}
+
+.card-poster-img {
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: 5rem;
+}
