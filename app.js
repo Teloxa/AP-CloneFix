@@ -29,7 +29,7 @@ const renderRow = (title, shows) => {
       rowsContainer.appendChild(section)  
 }
 
-const fetchJSON = async (url) => {
+const fetchJSON = async (url) => {.2
   const res = await fetch(url)
   if(!res.ok){
     throw new Error('Error to load data: ', url)

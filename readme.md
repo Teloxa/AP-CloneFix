@@ -1,44 +1,26 @@
-## 👤 Introduction
+# CloneFix - Streaming Platform
 
-Introduccion at the project
+## 📚 Documentación
+
+### What is it?
+The skeleton or basic structure of every web page.
+
+### Main Function
+Defines the structure and content of the page.
+Creates elements such as titles, paragraphs, images, and forms.
+Organizes content semantically.
 
 
-## Subtitle
-
-
-Text of the subtitle
-- A point
-- A point
-
-``` css
-body {
-  background: #0000;
-
-}
-
+```
+clonefix/
+├── src/
+│   ├── index.html          # Archivo principal HTML
+│   ├── app.css            # Estilos personalizados
+│   └── app.js             # Lógica de la aplicación
+└── README.md              # Documentación
 ```
 
 
---- 
-Separation
 
+- [version 01] ✔️ (version01.md) 
 
-```plaintext
-project/
-|- scr/
-| |--index.js
-```
-
-Tables
-```plaintext
-| Column 01 | Column 02 | Column 03 |
-|-----------|-----------|-----------|
-| Datos     | Datos.    | Datos.    |
-|-----------|-----------|-----------|
-```
-
-
-- [instalation] ✔️ (link to page) 
-
-
-<!-- code version 01 -->
