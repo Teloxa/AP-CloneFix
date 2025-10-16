@@ -10,31 +10,123 @@ const heroPlay = document.getElementById('heroPlay')
 
 
 const init = async () => {
-  const trending = await fetchJSON(`${API}/shows?page=1`)
-  renderRow("Trending", trending.slice(0, 20))
-  console.log('@@@ trending => ', trending)
+  if (!rowsContainer) return console.error('rowsContainer element not found')
+  try {
+    const trending = await fetchJSON(`${API}/shows?page=1`)
+    renderRow("Trending", trending.slice(0, 20))
+    console.log('@@@ trending => ', trending)
+  } catch (err) {
+    console.error('Init failed:', err)
+  }
+  // wire search handler after init
+  wireSearch()
+}
+
+const wireSearch = () => {
+  const form = document.getElementById('searchForm')
+  const input = document.getElementById('searchInput')
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const movie = input.value.trim()
+    if(!movie){
+      return
+    }
+    const results = await fetchJSON(`${API}/search/shows?q=${encodeURIComponent(movie)}`)
+    const shows = results.map(r => r.show)
+    rowsContainer.innerHTML = ''
+    renderRow(`Results for ${movie}`, shows)
+
+  })
 }
 
 const renderRow = (title, shows) => {
   const section = document.createElement('section')
-    section.classList = 'mb-3'
-    section.innerHTML = 
-    `
-      <h3 class="rowTitle">${title}</h3>
-      <div class="rail" data-rail></div>
-
-    `
-  
-      // function to create 
-      rowsContainer.appendChild(section)  
+  section.className = 'mb-3'
+  section.innerHTML = 
+  `
+    <h3 class="rowTitle">${title}</h3>
+    <div class="rail" data-rail></div>
+  `
+  const rail = section.querySelector('[data-rail]')
+  if (!Array.isArray(shows)) shows = []
+  shows.forEach((show) => {
+    rail.appendChild(posterCard(show))
+  })
+  rowsContainer.appendChild(section)
 }
 
-const fetchJSON = async (url) => {.2
+const posterCard = show => {
+  const card = document.createElement('div')
+  card.className = 'card card-poster'
+  const img = (show && show.image && show.image.medium) ? show.image.medium : 'https://placehold.co/600x400?text=Sin+Imagen'
+
+  card.innerHTML = 
+  `
+  <img class="card-img-top card-poster-img" src="${img}" alt="${escapeHTML(show?.name || 'Poster')}">
+  <div class="card-body p-2">
+    <div class="small text-secondary">
+      ${(show?.genres || []).slice(0,2).join(' . ')}
+    </div>
+    <div class="fw-semibold">
+      ${escapeHTML(show?.name || '')}
+    </div>
+  </div>
+  `
+  card.addEventListener('click', () => openDialog(show?.id))
+  return card
+}
+
+const escapeHTML = str => {
+  if (!str) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+const fetchJSON = async (url) => {
   const res = await fetch(url)
   if(!res.ok){
-    throw new Error('Error to load data: ', url)
+    throw new Error(`Error to load data: ${url}`)
   }
   return await res.json()
+}
+
+// open detail modal and load show details
+const openDialog = async (showId) => {
+  if (!showId) return
+  const modalEl = document.getElementById('detailModal')
+  const titleEl = document.getElementById('detailTitle')
+  const bodyEl = document.getElementById('detailBody')
+  if (!modalEl) return
+  try {
+    titleEl.textContent = 'Loading...'
+    bodyEl.innerHTML = 'Loading...'
+    const data = await fetchJSON(`${API}/shows/${showId}`)
+    titleEl.textContent = data.name || 'Detail'
+    bodyEl.innerHTML = `
+      <div class="row">
+        <div class="col-md-4">
+          <img src="${data.image?.medium || 'https://placehold.co/300x200?text=No+Image'}" class="img-fluid" alt="${escapeHTML(data.name)}">
+        </div>
+        <div class="col-md-8">
+          <p>${escapeHTML(data.summary || '')}</p>
+        </div>
+      </div>
+    `
+  } catch (err) {
+    titleEl.textContent = 'Error'
+    bodyEl.textContent = String(err)
+  }
+  // show bootstrap modal
+  try {
+    const bsModal = new bootstrap.Modal(modalEl)
+    bsModal.show()
+  } catch (e) {
+    console.warn('Bootstrap modal not available:', e)
+  }
 }
 
 init()
