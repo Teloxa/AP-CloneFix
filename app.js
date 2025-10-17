@@ -3,16 +3,16 @@ const API = "https://api.tvmaze.com"
 
 // DOM elements
 const rowsContainer = document.getElementById('rowsContainer')
-const hero = document.getElementById('hero')
+const hero = document.getElementById('hero') || document.querySelector('.hero')
 const heroTitle = document.getElementById('heroTitle')
 const heroDesc = document.getElementById('heroDesc')
 const heroPlay = document.getElementById('heroPlay')
-
 
 const init = async () => {
   if (!rowsContainer) return console.error('rowsContainer element not found')
   try {
     const trending = await fetchJSON(`${API}/shows?page=1`)
+    renderHero(trending[Math.floor(Math.random() * trending.length)])
     renderRow("Trending", trending.slice(0, 20))
     console.log('@@@ trending => ', trending)
   } catch (err) {
@@ -42,8 +42,7 @@ const wireSearch = () => {
 const renderRow = (title, shows) => {
   const section = document.createElement('section')
   section.className = 'mb-3'
-  section.innerHTML = 
-  `
+  section.innerHTML = `
     <h3 class="rowTitle">${title}</h3>
     <div class="rail" data-rail></div>
   `
@@ -60,19 +59,18 @@ const posterCard = show => {
   card.className = 'card card-poster'
   const img = (show && show.image && show.image.medium) ? show.image.medium : 'https://placehold.co/600x400?text=Sin+Imagen'
 
-  card.innerHTML = 
-  `
-  <img class="card-img-top card-poster-img" src="${img}" alt="${escapeHTML(show?.name || 'Poster')}">
-  <div class="card-body p-2">
-    <div class="small text-secondary">
-      ${(show?.genres || []).slice(0,2).join(' . ')}
+  card.innerHTML = `
+    <img class="card-img-top card-poster-img" src="${img}" alt="${escapeHTML(show?.name || 'Poster')}">
+    <div class="card-body p-2">
+      <div class="small text-secondary">
+        ${(show?.genres || []).slice(0,2).join(' . ')}
+      </div>
+      <div class="fw-semibold">
+        ${escapeHTML(show?.name || '')}
+      </div>
     </div>
-    <div class="fw-semibold">
-      ${escapeHTML(show?.name || '')}
-    </div>
-  </div>
   `
-  card.addEventListener('click', () => openDialog(show?.id))
+  card.addEventListener('click', () => openDetail(show?.id))
   return card
 }
 
@@ -126,6 +124,65 @@ const openDialog = async (showId) => {
     bsModal.show()
   } catch (e) {
     console.warn('Bootstrap modal not available:', e)
+  }
+}
+
+const renderHero = show => {
+  if(!show){
+    return
+  }
+  const bg = show?.image?.original || show?.image?.medium || 'https://placehold.co/600x400?text=Sin+Imagen'
+  hero.style.backgroundImage = bg ? `url(${bg})` : 'none'
+  heroTitle.textContent = show.name || ''
+  heroDesc.textContent = stripHTML(show?.summary || '').slice(0,200) + '...'
+  if (heroPlay) {
+    heroPlay.onclick = () => openDialog(show.id)
+  }
+}
+
+const stripHTML = html => {
+  return (html||"").replace(/<[^>]*>/g,"");
+}
+
+const openDetail = async (id) => {
+  const modalEl = document.getElementById('detailModal')
+  const modalbody = document.getElementById('detailBody')
+  const modalTitle = document.getElementById('detailTitle')
+  if (!modalEl || !modalTitle || !modalbody) return
+  modalTitle.textContent = 'Loading....'
+  modalbody.innerHTML = 'Loading'
+
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl)
+
+  try {
+    const show = await fetchJSON(`${API}/shows/${id}`)
+    modalTitle.textContent = show.name || 'Detail'
+    modalbody.innerHTML = `
+      <div class="row g-4">
+        <div class="col-md-4">
+          <img class="img-fluid rounded" src="${show?.image?.original || show?.image?.medium || 'https://placehold.co/600x400?text=No+Image'}" alt="${escapeHTML(show?.name || '')}">
+        </div>
+        <div class="col-md-8">
+          <div class="mb-2">
+            ${(show?.genres || []).map(g => `
+              <span class="badge badge-genre me-1">${escapeHTML(g)}</span>
+            `).join("")}
+          </div>
+          <p class="text-secondary small">
+            ${escapeHTML(stripHTML(show?.summary || 'Sin sinpsis'))}
+          </p>
+          <p class="text-secondary small">
+            ⭐${show?.rating?.average ?? 'N/A'} - Language: ${escapeHTML(show?.language || 'N/A')} - Status: ${escapeHTML(show?.status || 'N/A')}
+          </p>
+          <a class="btn btn-outline-light me-2" href="${show?.officialSite || show?.url || '#'}" target="_blank" rel="noopener">Web site</a>
+        </div>
+      </div>
+    `
+    modal.show()
+  } catch (err) {
+    modalTitle.textContent = 'Error'
+    modalbody.textContent = String(err)
+    modal.show()
   }
 }
 
