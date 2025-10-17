@@ -22,5 +22,6 @@ clonefix/
 
 
 
-- [version 01] ✔️ (version01.md) 
+- [version 01] ✔️ (./version01.md) 
+- [version 02] ✔️ (./version02.md) 
 

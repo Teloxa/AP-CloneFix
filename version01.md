@@ -190,5 +190,5 @@ init()
 ```
 ## Navegation
 
-- ✔️ [Home] (readme.md)
-- ❌ [Version 02] (null)
+- ✔️ [Home] (./readme.md)
+- ❌ [Version 02] (./version02.md)
